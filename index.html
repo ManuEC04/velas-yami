@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velas Yami | Atelier de Luz</title>
+    <title>Velas Yami | Velas Artesanales</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@100;300;400;600&display=swap" rel="stylesheet">
     
     <style>
@@ -16,128 +15,132 @@
         body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfc; color: #1c1917; overflow-x: hidden; }
         h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; }
 
-        /* TEXTURA GARANTIZADA */
-        .bg-atelier-textured {
+        .bg-textured {
             background-color: #fdfdfc;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%231c1917' fill-opacity='0.03' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
             background-attachment: fixed;
-            position: relative;
         }
 
-        .texture-overlay {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.5) 0%, rgba(253,253,252,0) 100%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .fade-in { animation: fadeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-in { animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .glass-nav { 
-            background: rgba(253, 253, 252, 0.85); 
-            backdrop-filter: blur(20px); 
-            border-bottom: 1px solid rgba(28, 25, 23, 0.08); 
+            background: rgba(253, 253, 252, 0.9); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(28, 25, 23, 0.05); 
         }
     </style>
 </head>
 
-<body x-data="tiendaApp()">
+<body x-data="tiendaApp()" class="bg-textured">
 
     <template x-if="!verCatalogo">
-        <section class="h-screen w-full flex items-center justify-center bg-stone-950 text-white relative overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1570823635306-250abb06d4b3?w=1600" class="absolute inset-0 w-full h-full object-cover opacity-30 scale-105">
+        <section class="h-screen w-full flex items-center justify-center bg-stone-900 text-white relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1570823635306-250abb06d4b3?w=1600" class="absolute inset-0 w-full h-full object-cover opacity-40">
             <div class="relative z-10 text-center fade-in px-6">
-                <span class="text-[10px] tracking-[0.8em] uppercase opacity-40 mb-6 block font-light">Atelier de Fragancias</span>
-                <h1 class="text-7xl md:text-9xl italic mb-12 font-light tracking-tighter">Velas Yami</h1>
-                <button @click="irAlCatalogo()" class="border border-white/20 px-14 py-5 hover:bg-white hover:text-stone-950 transition-all duration-700 uppercase tracking-[0.4em] text-[9px] font-bold">
-                    Descubrir la Colección
+                <span class="text-[10px] tracking-[0.8em] uppercase opacity-60 mb-6 block font-light">Fragancias para tu Hogar</span>
+                <h1 class="text-6xl md:text-9xl italic mb-12 font-light tracking-tighter">Velas Yami</h1>
+                <button @click="irAlCatalogo()" class="border border-white/30 px-12 py-5 hover:bg-white hover:text-stone-950 transition-all duration-700 uppercase tracking-[0.4em] text-[9px] font-bold">
+                    Ver Catálogo
                 </button>
             </div>
         </section>
     </template>
 
     <template x-if="verCatalogo">
-        <div class="min-h-screen bg-atelier-textured fade-in flex flex-col" x-cloak>
-            <div class="texture-overlay"></div>
-
-            <nav class="glass-nav p-8 flex justify-between items-center px-12 sticky top-0 z-50">
+        <div class="min-h-screen flex flex-col" x-cloak>
+            
+            <nav class="glass-nav p-6 md:p-8 flex justify-between items-center px-6 md:px-12 sticky top-0 z-50">
                 <button @click="verCatalogo = false" class="text-[9px] uppercase tracking-[0.3em] text-stone-400 hover:text-stone-900 transition font-bold">← Inicio</button>
-                <h2 class="text-3xl italic tracking-widest text-stone-800">Velas Yami</h2>
+                <h2 class="text-2xl md:text-3xl italic tracking-widest text-stone-800">Velas Yami</h2>
                 <button @click="cartOpen = true" class="text-[9px] uppercase tracking-[0.3em] font-bold border-b border-stone-300 pb-1">
                     Cesta (<span x-text="cart.length"></span>)
                 </button>
             </nav>
 
-            <main class="max-w-7xl mx-auto py-16 px-10 relative z-10 flex-grow">
-                <header class="text-center mb-12 max-w-2xl mx-auto">
-                    <h3 class="text-6xl italic text-stone-900 mb-6 leading-tight">Esencias que iluminan el alma</h3>
-                    <div class="w-12 h-px bg-stone-300 mx-auto mb-8"></div>
-                    <p class="text-stone-400 font-light text-[11px] tracking-[0.3em] uppercase italic">Artesanía consciente • Cera de Soja</p>
+            <main class="max-w-7xl mx-auto py-12 md:py-20 px-6 md:px-10 relative z-10 flex-grow">
+                <header class="text-center mb-16 max-w-2xl mx-auto">
+                    <h3 class="text-5xl md:text-6xl italic text-stone-900 mb-6 leading-tight">Ilumina tus momentos</h3>
+                    <div class="w-12 h-px bg-stone-200 mx-auto mb-8"></div>
+                    <p class="text-stone-400 font-light text-[10px] tracking-[0.3em] uppercase italic">Hechas a mano con Cera de Soja</p>
                 </header>
 
-                <div x-show="cargando" class="text-center py-20 italic text-stone-300 tracking-[0.3em] text-xs">Conectando con el Atelier...</div>
+                <div x-show="cargando" class="text-center py-20 italic text-stone-300 tracking-[0.3em] text-[10px] uppercase font-bold">Cargando catálogo...</div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-32">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20 md:gap-y-32">
                     <template x-for="p in productos" :key="p.id">
-                        <div class="group flex flex-col items-center">
-                            <div class="relative w-full aspect-[4/5] overflow-hidden bg-white p-5 shadow-sm group-hover:shadow-2xl transition-all duration-700 ring-1 ring-black/5">
-                                <img :src="p.imagen" class="w-full h-full object-cover transition duration-[3s] group-hover:scale-105">
-                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-700 bg-stone-900/5 backdrop-blur-[2px]">
-                                    <button @click="agregar(p)" class="bg-stone-900 text-white px-10 py-4 text-[9px] uppercase tracking-[0.4em] hover:bg-black transition-all">
-                                        Seleccionar
+                        <div class="group flex flex-col items-center fade-in">
+                            <div class="relative w-full aspect-[4/5] overflow-hidden bg-white p-4 shadow-sm group-hover:shadow-xl transition-all duration-700 border border-stone-100">
+                                <img :src="p.imagen" class="w-full h-full object-cover transition duration-[2s] group-hover:scale-105">
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-stone-900/5 backdrop-blur-[1px]">
+                                    <button @click="agregar(p)" class="bg-stone-900 text-white px-8 py-4 text-[9px] uppercase tracking-[0.4em] hover:bg-black">
+                                        Agregar +
                                     </button>
                                 </div>
                             </div>
-                            <div class="mt-12 text-center">
-                                <span class="text-[8px] tracking-[0.5em] text-amber-800/40 uppercase mb-4 block font-bold" x-text="p.categoria || 'Hecho a mano'"></span>
-                                <h4 class="text-3xl text-stone-800 mb-3 font-light italic" x-text="p.titulo"></h4>
-                                <p class="text-xl text-stone-900 font-light" x-text="'$' + p.precio"></p>
+                            <div class="mt-8 text-center px-4">
+                                <span class="text-[8px] tracking-[0.5em] text-stone-300 uppercase mb-3 block font-bold" x-text="p.categoria || 'Velas Yami 2026'"></span>
+                                <h4 class="text-2xl text-stone-800 mb-2 font-light italic" x-text="p.titulo"></h4>
+                                <p class="text-lg text-stone-900 font-light" x-text="'$' + p.precio"></p>
                             </div>
+                            <button @click="agregar(p)" class="md:hidden mt-6 text-[9px] uppercase tracking-widest border border-stone-200 px-6 py-3 font-bold">Agregar +</button>
                         </div>
                     </template>
                 </div>
             </main>
 
-            <footer class="py-20 text-center border-t border-stone-200/50 bg-white/20 backdrop-blur-sm z-10">
-                <div class="mb-6 opacity-20 tracking-[1em] text-[10px] uppercase font-bold">Velas Yami</div>
-                <p class="text-[10px] uppercase tracking-[0.6em] text-stone-400 font-bold">© 2026 • Todos los derechos reservados</p>
+            <footer class="py-16 text-center border-t border-stone-100 bg-white/40 z-10">
+                <p class="text-[9px] uppercase tracking-[0.6em] text-stone-300 font-bold">© Velas Yami • 2026</p>
             </footer>
         </div>
     </template>
 
     <div x-show="cartOpen" x-cloak class="fixed inset-0 z-[70]">
-        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" @click="cartOpen = false" x-transition.opacity></div>
-        <div class="absolute right-0 top-0 h-full w-full max-w-sm bg-white p-14 shadow-2xl flex flex-col" 
+        <div class="absolute inset-0 bg-stone-900/10 backdrop-blur-sm" @click="cartOpen = false" x-transition.opacity></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white p-8 md:p-14 shadow-2xl flex flex-col" 
              x-transition:enter="transition ease-out duration-500 transform" x-transition:enter-start="translate-x-full">
-            <h2 class="text-4xl italic mb-14 text-stone-900 border-b pb-6">Tu Cesta</h2>
-            <div class="flex-1 overflow-y-auto">
+            
+            <div class="flex justify-between items-center mb-12 border-b pb-6">
+                <h2 class="text-3xl italic text-stone-900">Tu Pedido</h2>
+                <button @click="cartOpen = false" class="text-stone-400 hover:text-stone-900 uppercase text-[10px] tracking-widest font-bold">Cerrar</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto pr-2">
                 <template x-for="item in cart" :key="item.id">
-                    <div class="flex items-center gap-6 mb-10 pb-10 border-b border-stone-50">
+                    <div class="flex items-center gap-6 mb-8 pb-8 border-b border-stone-50">
+                        <img :src="item.imagen" class="w-16 h-16 object-cover border border-stone-100">
                         <div class="flex-1">
-                            <h4 class="text-xl text-stone-800" x-text="item.titulo"></h4>
-                            <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-2 uppercase" x-text="item.cantidad + ' Pieza(s)'"></p>
-                            <p class="text-sm font-bold text-stone-900 mt-2" x-text="'$' + (item.precio * item.cantidad)"></p>
+                            <h4 class="text-lg text-stone-800 italic" x-text="item.titulo"></h4>
+                            <div class="flex items-center gap-4 mt-2">
+                                <button @click="disminuir(item)" class="text-stone-300 hover:text-stone-900">－</button>
+                                <span class="text-[10px] font-bold" x-text="item.cantidad"></span>
+                                <button @click="aumentar(item)" class="text-stone-300 hover:text-stone-900">＋</button>
+                            </div>
                         </div>
-                        <button @click="cart = cart.filter(i => i.id !== item.id)" class="text-stone-300 hover:text-stone-900 text-2xl">&times;</button>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-stone-900" x-text="'$' + (item.precio * item.cantidad)"></p>
+                            <button @click="quitar(item.id)" class="text-[9px] text-red-300 hover:text-red-600 mt-2 uppercase font-bold tracking-tighter">Quitar</button>
+                        </div>
                     </div>
                 </template>
+                <div x-show="cart.length === 0" class="text-center py-20 italic text-stone-300 text-sm">No has agregado velas todavía.</div>
             </div>
-            <div class="mt-auto pt-10 border-t border-stone-100">
-                <div class="flex justify-between text-2xl italic mb-10 text-stone-900">
-                    <span>Total</span><span x-text="'$' + total()"></span>
+
+            <div class="mt-auto pt-8 border-t border-stone-100">
+                <div class="flex justify-between text-xl italic mb-8 text-stone-900">
+                    <span>Total Pedido</span><span x-text="'$' + total()"></span>
                 </div>
-                <button @click="enviarWhatsApp()" class="w-full bg-stone-900 text-white py-6 text-[10px] uppercase tracking-[0.5em] font-bold">Confirmar Pedido</button>
+                <button @click="enviarWhatsApp()" :disabled="cart.length === 0" class="w-full bg-stone-900 text-white py-6 text-[10px] uppercase tracking-[0.5em] font-bold disabled:opacity-20">
+                    Confirmar por WhatsApp
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuración Global de Supabase
         const SB_URL = 'https://fzrvdivtpmkmcxydcxgd.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6cnZkaXZ0cG1rbWN4eWRjeGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NjE4MTYsImV4cCI6MjA4OTMzNzgxNn0.MSLsSsh3FNvzrO93JrCg04niSNQr9ogLfBqF_I6KLAM';
         const supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
@@ -152,18 +155,17 @@
 
                 async irAlCatalogo() {
                     this.verCatalogo = true;
-                    // Solo cargamos si la lista está vacía
                     if (this.productos.length === 0) {
                         this.cargando = true;
                         try {
                             const { data, error } = await supabaseClient
                                 .from('productos')
                                 .select('*')
-                                .order('created_at', { ascending: true });
+                                .order('created_at', { ascending: false });
                             if (error) throw error;
                             this.productos = data || [];
                         } catch (err) {
-                            console.error("Error:", err.message);
+                            console.error("Error de conexión:", err.message);
                         } finally {
                             this.cargando = false;
                         }
@@ -172,9 +174,14 @@
 
                 agregar(p) {
                     let item = this.cart.find(i => i.id === p.id);
-                    item ? item.cantidad++ : this.cart.push({ ...p, cantidad: 1 });
+                    if (item) { item.cantidad++; } 
+                    else { this.cart.push({ ...p, cantidad: 1 }); }
                     this.cartOpen = true;
                 },
+
+                aumentar(item) { item.cantidad++; },
+                disminuir(item) { if(item.cantidad > 1) item.cantidad--; },
+                quitar(id) { this.cart = this.cart.filter(i => i.id !== id); },
 
                 total() {
                     return this.cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
@@ -182,8 +189,9 @@
 
                 enviarWhatsApp() {
                     const resumen = this.cart.map(i => `${i.cantidad}x ${i.titulo}`).join(', ');
-                    const msg = encodeURIComponent(`Hola Velas Yami, mi pedido: ${resumen}. Total: $${this.total()}`);
-                    window.open(`https://wa.me/123456789?text=${msg}`, '_blank');
+                    const msg = encodeURIComponent(`Hola Velas Yami, mi pedido es: ${resumen}. Total: $${this.total()}. ¿Cómo coordinamos el pago y envío?`);
+                    // Número actualizado según tu solicitud
+                    window.open(`https://wa.me/5354757631?text=${msg}`, '_blank');
                 }
             }
         }
