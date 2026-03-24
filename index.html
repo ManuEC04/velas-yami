@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velas Yami | Atelier de Luz</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@100;300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfc; color: #1c1917; overflow-x: hidden; }
+        h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; }
+
+        /* TEXTURA GARANTIZADA */
+        .bg-atelier-textured {
+            background-color: #fdfdfc;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%231c1917' fill-opacity='0.03' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        .texture-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.5) 0%, rgba(253,253,252,0) 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .fade-in { animation: fadeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-nav { 
+            background: rgba(253, 253, 252, 0.85); 
+            backdrop-filter: blur(20px); 
+            border-bottom: 1px solid rgba(28, 25, 23, 0.08); 
+        }
+    </style>
+</head>
+
+<body x-data="tiendaApp()">
+
+    <template x-if="!verCatalogo">
+        <section class="h-screen w-full flex items-center justify-center bg-stone-950 text-white relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1570823635306-250abb06d4b3?w=1600" class="absolute inset-0 w-full h-full object-cover opacity-30 scale-105">
+            <div class="relative z-10 text-center fade-in px-6">
+                <span class="text-[10px] tracking-[0.8em] uppercase opacity-40 mb-6 block font-light">Atelier de Fragancias</span>
+                <h1 class="text-7xl md:text-9xl italic mb-12 font-light tracking-tighter">Velas Yami</h1>
+                <button @click="irAlCatalogo()" class="border border-white/20 px-14 py-5 hover:bg-white hover:text-stone-950 transition-all duration-700 uppercase tracking-[0.4em] text-[9px] font-bold">
+                    Descubrir la Colección
+                </button>
+            </div>
+        </section>
+    </template>
+
+    <template x-if="verCatalogo">
+        <div class="min-h-screen bg-atelier-textured fade-in flex flex-col" x-cloak>
+            <div class="texture-overlay"></div>
+
+            <nav class="glass-nav p-8 flex justify-between items-center px-12 sticky top-0 z-50">
+                <button @click="verCatalogo = false" class="text-[9px] uppercase tracking-[0.3em] text-stone-400 hover:text-stone-900 transition font-bold">← Inicio</button>
+                <h2 class="text-3xl italic tracking-widest text-stone-800">Velas Yami</h2>
+                <button @click="cartOpen = true" class="text-[9px] uppercase tracking-[0.3em] font-bold border-b border-stone-300 pb-1">
+                    Cesta (<span x-text="cart.length"></span>)
+                </button>
+            </nav>
+
+            <main class="max-w-7xl mx-auto py-16 px-10 relative z-10 flex-grow">
+                <header class="text-center mb-12 max-w-2xl mx-auto">
+                    <h3 class="text-6xl italic text-stone-900 mb-6 leading-tight">Esencias que iluminan el alma</h3>
+                    <div class="w-12 h-px bg-stone-300 mx-auto mb-8"></div>
+                    <p class="text-stone-400 font-light text-[11px] tracking-[0.3em] uppercase italic">Artesanía consciente • Cera de Soja</p>
+                </header>
+
+                <div x-show="cargando" class="text-center py-20 italic text-stone-300 tracking-[0.3em] text-xs">Conectando con el Atelier...</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-32">
+                    <template x-for="p in productos" :key="p.id">
+                        <div class="group flex flex-col items-center">
+                            <div class="relative w-full aspect-[4/5] overflow-hidden bg-white p-5 shadow-sm group-hover:shadow-2xl transition-all duration-700 ring-1 ring-black/5">
+                                <img :src="p.imagen" class="w-full h-full object-cover transition duration-[3s] group-hover:scale-105">
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-700 bg-stone-900/5 backdrop-blur-[2px]">
+                                    <button @click="agregar(p)" class="bg-stone-900 text-white px-10 py-4 text-[9px] uppercase tracking-[0.4em] hover:bg-black transition-all">
+                                        Seleccionar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-12 text-center">
+                                <span class="text-[8px] tracking-[0.5em] text-amber-800/40 uppercase mb-4 block font-bold" x-text="p.categoria || 'Hecho a mano'"></span>
+                                <h4 class="text-3xl text-stone-800 mb-3 font-light italic" x-text="p.titulo"></h4>
+                                <p class="text-xl text-stone-900 font-light" x-text="'$' + p.precio"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </main>
+
+            <footer class="py-20 text-center border-t border-stone-200/50 bg-white/20 backdrop-blur-sm z-10">
+                <div class="mb-6 opacity-20 tracking-[1em] text-[10px] uppercase font-bold">Velas Yami</div>
+                <p class="text-[10px] uppercase tracking-[0.6em] text-stone-400 font-bold">© 2026 • Todos los derechos reservados</p>
+            </footer>
+        </div>
+    </template>
+
+    <div x-show="cartOpen" x-cloak class="fixed inset-0 z-[70]">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" @click="cartOpen = false" x-transition.opacity></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-sm bg-white p-14 shadow-2xl flex flex-col" 
+             x-transition:enter="transition ease-out duration-500 transform" x-transition:enter-start="translate-x-full">
+            <h2 class="text-4xl italic mb-14 text-stone-900 border-b pb-6">Tu Cesta</h2>
+            <div class="flex-1 overflow-y-auto">
+                <template x-for="item in cart" :key="item.id">
+                    <div class="flex items-center gap-6 mb-10 pb-10 border-b border-stone-50">
+                        <div class="flex-1">
+                            <h4 class="text-xl text-stone-800" x-text="item.titulo"></h4>
+                            <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-2 uppercase" x-text="item.cantidad + ' Pieza(s)'"></p>
+                            <p class="text-sm font-bold text-stone-900 mt-2" x-text="'$' + (item.precio * item.cantidad)"></p>
+                        </div>
+                        <button @click="cart = cart.filter(i => i.id !== item.id)" class="text-stone-300 hover:text-stone-900 text-2xl">&times;</button>
+                    </div>
+                </template>
+            </div>
+            <div class="mt-auto pt-10 border-t border-stone-100">
+                <div class="flex justify-between text-2xl italic mb-10 text-stone-900">
+                    <span>Total</span><span x-text="'$' + total()"></span>
+                </div>
+                <button @click="enviarWhatsApp()" class="w-full bg-stone-900 text-white py-6 text-[10px] uppercase tracking-[0.5em] font-bold">Confirmar Pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración Global de Supabase
+        const SB_URL = 'https://fzrvdivtpmkmcxydcxgd.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6cnZkaXZ0cG1rbWN4eWRjeGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3NjE4MTYsImV4cCI6MjA4OTMzNzgxNn0.MSLsSsh3FNvzrO93JrCg04niSNQr9ogLfBqF_I6KLAM';
+        const supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
+
+        function tiendaApp() {
+            return {
+                verCatalogo: false,
+                cartOpen: false,
+                cargando: false,
+                productos: [],
+                cart: [],
+
+                async irAlCatalogo() {
+                    this.verCatalogo = true;
+                    // Solo cargamos si la lista está vacía
+                    if (this.productos.length === 0) {
+                        this.cargando = true;
+                        try {
+                            const { data, error } = await supabaseClient
+                                .from('productos')
+                                .select('*')
+                                .order('created_at', { ascending: true });
+                            if (error) throw error;
+                            this.productos = data || [];
+                        } catch (err) {
+                            console.error("Error:", err.message);
+                        } finally {
+                            this.cargando = false;
+                        }
+                    }
+                },
+
+                agregar(p) {
+                    let item = this.cart.find(i => i.id === p.id);
+                    item ? item.cantidad++ : this.cart.push({ ...p, cantidad: 1 });
+                    this.cartOpen = true;
+                },
+
+                total() {
+                    return this.cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+                },
+
+                enviarWhatsApp() {
+                    const resumen = this.cart.map(i => `${i.cantidad}x ${i.titulo}`).join(', ');
+                    const msg = encodeURIComponent(`Hola Velas Yami, mi pedido: ${resumen}. Total: $${this.total()}`);
+                    window.open(`https://wa.me/123456789?text=${msg}`, '_blank');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
